@@ -9,7 +9,6 @@ Created on Sun Mar  7 12:47:33 2021
 from ete3 import PhyloTree, PhyloTree
 import random
 
-#tree = PhyloTree('/Users/claraiglhaut/Desktop/Sim/E_500/tr_2_la_10/out_bioNJ/tree16.nwk', alignment = '/Users/claraiglhaut/Desktop/Sim/E_500/tr_2_la_10/output/sim-0_MSA.fasta', alg_format = 'fasta')
 
 characters = ['A', 'T', 'C', 'G', '-']
 
@@ -22,11 +21,6 @@ def parsimony_leaves(leaf):
     
     pars_scores = [0]*len(leaf.sequence)
     leaf.add_features(parsimony_scores = pars_scores)    
-
-    
-#def parsimony_leaves_per_site(leaf, i):
-    #leaf.parsimony_sets[i] = set(leaf.sequence[i])
-    
     
 def parsimony_internal_per_site(tree, i):
     
@@ -36,12 +30,9 @@ def parsimony_internal_per_site(tree, i):
     right_set = tree.children[1].parsimony_sets[i]
     right_score  = tree.children[1].parsimony_scores[i]
     
-    print(left_set.intersection(right_set))
-    
     if not left_set.intersection(right_set):
         tree.parsimony_sets[i] = left_set.union(right_set)
         tree.parsimony_scores[i] = left_score + right_score + 1
-        print(left_score + right_score + 1)
     else:
         tree.parsimony_sets[i] = left_set.intersection(right_set)
         tree.parsimony_scores[i] = left_score + right_score
@@ -81,10 +72,7 @@ def DolloParsimony(tree):
         # calculate parsimony score
         for node in subtree.traverse('postorder'):
             if not node.is_leaf():
-                print(node)
-                
                 parsimony_internal_per_site(node, i)
-                print(node.parsimony_scores)
                 
         # move the parsimony score to the root node
         tree.parsimony_sets[i] = subtree.parsimony_sets[i]
@@ -92,7 +80,6 @@ def DolloParsimony(tree):
         
         
     # calculate the total tree score 
-    print(tree.parsimony_scores)
     tree_score = sum(tree.parsimony_scores)
     
     return tree_score
@@ -110,15 +97,3 @@ def construct_pars_tree_Dollo(tree):
                     sequence_constr.append(char)
     
         node.add_features(sequence = sequence_constr)
-
-#print(DolloParsimony(tree))
-
-#no_gap_leaves = list(filter(lambda leaf: leaf.sequence[i] != '-', leaves))
-
-newick = '/Users/claraiglhaut/Desktop/ZHAW/TrackModule2/test_data/test_tree1'
-alignment = '/Users/claraiglhaut/Desktop/ZHAW/TrackModule2/test_data/test_sequence2'
-
-tree = PhyloTree(newick=newick, alignment=alignment)
-
-print(DolloParsimony(tree))
-            
