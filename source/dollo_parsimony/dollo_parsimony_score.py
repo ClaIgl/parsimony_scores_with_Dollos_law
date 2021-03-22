@@ -6,7 +6,7 @@ Created on Sun Mar  7 12:47:33 2021
 @author: claraiglhaut
 """
 
-from ete3 import PhyloTree, PhyloTree
+from ete3 import PhyloTree
 import random
 
 
@@ -44,11 +44,7 @@ def DolloParsimony(tree):
         Output: parsimony score of the tree with Dollo's law
     '''
     
-    leaves = [] #get all leaves
-    for leaf in tree.iter_leaves():
-        leaves.append(leaf)
-    
-    length_MSA = len(leaves[0].sequence)
+    length_MSA = len(tree.get_leaves()[0].sequence)
     
     #sets and scores for every node
     for node in tree.traverse('postorder'):
@@ -64,11 +60,11 @@ def DolloParsimony(tree):
     
     for i in range(length_MSA):
         #find all leaves with no gap in this position
-        no_gap_leaves = [leaf for leaf in leaves if leaf.sequence[i] != '-']
+        no_gap_leaves = [leaf for leaf in tree.iter_leaves() if leaf.sequence[i] != '-']
    
         #find the insertion event
         subtree = tree.get_common_ancestor(no_gap_leaves)
-        print(subtree)
+     
         # calculate parsimony score
         for node in subtree.traverse('postorder'):
             if not node.is_leaf():
@@ -81,7 +77,6 @@ def DolloParsimony(tree):
         
     # calculate the total tree score 
     tree_score = sum(tree.parsimony_scores)
-    
     return tree_score
 
 def construct_pars_tree_Dollo(tree):
