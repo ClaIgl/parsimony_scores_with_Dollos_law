@@ -6,9 +6,7 @@ Created on Sun Mar  7 12:47:33 2021
 @author: claraiglhaut
 """
 
-from ete3 import PhyloTree
 import random
-
 
 characters = ['A', 'T', 'C', 'G', '-']
 
@@ -21,6 +19,7 @@ def parsimony_leaves(leaf):
     
     pars_scores = [0]*len(leaf.sequence)
     leaf.add_features(parsimony_scores = pars_scores)    
+
     
 def parsimony_internal_per_site(tree, i):
     
@@ -30,23 +29,34 @@ def parsimony_internal_per_site(tree, i):
     right_set = tree.children[1].parsimony_sets[i]
     right_score  = tree.children[1].parsimony_scores[i]
     
-    if not left_set.intersection(right_set):
+    if left_set == set('-') and right_set == set('-'):
+        tree.parsimony_sets[i] = set('-')
+        tree.parsimony_scores[i] = left_score + right_score
+        
+    elif (left_set == set('-') and right_set != set('-')):
+        tree.parsimony_sets[i] = right_set
+        tree.parsimony_scores[i] = left_score + right_score + 1
+        
+    elif (left_set != set('-') and right_set == set('-')):
+        tree.parsimony_sets[i] = left_set
+        tree.parsimony_scores[i] = left_score + right_score + 1
+       
+    elif not left_set.intersection(right_set):
         tree.parsimony_sets[i] = left_set.union(right_set)
         tree.parsimony_scores[i] = left_score + right_score + 1
     else:
         tree.parsimony_sets[i] = left_set.intersection(right_set)
         tree.parsimony_scores[i] = left_score + right_score
-            
-
+       
 
 def DolloParsimony(tree):
     ''' Input: tree of type PhyloTree
         Output: parsimony score of the tree with Dollo's law
     '''
     
-    length_MSA = len(tree.get_leaves()[0].sequence)
+    llength_MSA = len(tree.get_leaves()[0].sequence)
     
-    #sets and scores for every node
+    #empty sets and scores for every node
     for node in tree.traverse('postorder'):
         pars_sets = [set()] * length_MSA
         pars_scores = [0] * length_MSA
@@ -56,28 +66,16 @@ def DolloParsimony(tree):
     #sets and scores for leaves
     for leaf in tree.iter_leaves():
         parsimony_leaves(leaf)
-
     
+    #find internal sets and scores
     for i in range(length_MSA):
-        #find all leaves with no gap in this position
-        no_gap_leaves = [leaf for leaf in tree.iter_leaves() if leaf.sequence[i] != '-']
-   
-        #find the insertion event
-        subtree = tree.get_common_ancestor(no_gap_leaves)
-     
-        # calculate parsimony score
-        for node in subtree.traverse('postorder'):
+        for node in tree.traverse('postorder'):
             if not node.is_leaf():
                 parsimony_internal_per_site(node, i)
-                
-        # move the parsimony score to the root node
-        tree.parsimony_sets[i] = subtree.parsimony_sets[i]
-        tree.parsimony_scores[i] = subtree.parsimony_scores[i]
-        
-        
-    # calculate the total tree score 
     tree_score = sum(tree.parsimony_scores)
+    
     return tree_score
+
 
 def construct_pars_tree_Dollo(tree):
     DolloParsimony(tree)
