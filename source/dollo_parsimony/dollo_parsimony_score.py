@@ -54,7 +54,7 @@ def DolloParsimony(tree):
         Output: parsimony score of the tree with Dollo's law
     '''
     
-    llength_MSA = len(tree.get_leaves()[0].sequence)
+    length_MSA = len(tree.get_leaves()[0].sequence)
     
     #empty sets and scores for every node
     for node in tree.traverse('postorder'):
