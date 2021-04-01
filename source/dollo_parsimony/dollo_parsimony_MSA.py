@@ -9,22 +9,22 @@ from ete3 import PhyloTree
 import numpy as np
 import random
 
-sequences = '/Users/claraiglhaut/Desktop/ZHAW/TrackModule2/test_data_MSA/test_MSA_sequence1'
-newick = '/Users/claraiglhaut/Desktop/ZHAW/TrackModule2/test_data_MSA/test_MSA_tree1'
+sequences = '/Users/claraiglhaut/Desktop/ZHAW/TrackModule2/test_data_MSA/test_MSA_sequence'
+newick = '/Users/claraiglhaut/Desktop/ZHAW/TrackModule2/test_data_MSA/test_MSA_tree'
 
 tree = PhyloTree(newick=newick, alignment=sequences)
 print(tree)
   
 
-def ParsimonySetsLeaves(leaf):
+def InitalizeSetsAndAlignment(leaf):
     pars_sets = [set(character) for character in leaf.sequence]
     align = np.empty((1, len(leaf.sequence)), dtype=str)
     for i in range(len(leaf.sequence)):
         align[0][i] = leaf.sequence[i]
-    
                      
     leaf.add_features(parsimony_sets = pars_sets)
     leaf.add_features(alignment = align)
+
 
 #%%    
 def GenerateMatrices(tree):
@@ -68,22 +68,30 @@ def GenerateMatrices(tree):
                 moves.append(3) #move vertical
             
             T[i][j] = random.choice(moves)
+            
+    parsimony_score = S[len(left_sets)][len(right_sets)]
     
-    return S, T
+    return parsimony_score, T
 
 
+#%%
 def TraceBack(T, tree):
 
     left_alignment = tree.children[0].alignment
     right_alignment = tree.children[1].alignment
+    
+    left_sets = tree.children[0].parsimony_sets
+    right_sets = tree.children[1].parsimony_sets
 
     number_of_rows = len(left_alignment) + len(right_alignment)
     
     align = np.empty((number_of_rows, 0), dtype=str)
     
+    
     i = left_alignment.shape[1]
     j = right_alignment.shape[1]
     
+    pars_sets = []
     
     while i > 0 or j > 0:
         
@@ -92,8 +100,13 @@ def TraceBack(T, tree):
             for n in range(len(left_alignment)):
                 new_col[n] = left_alignment[n][i-1]
             for m in range(len(right_alignment)):
-                new_col[len(left_alignment)+m] = right_alignment[m][j-1]  
+                new_col[len(left_alignment)+m] = right_alignment[m][j-1]
                 
+            if not left_sets[i-1].intersection(right_sets[j-1]):
+                pars_sets.insert(0, left_sets[i-1].union(right_sets[j-1]))
+            else:
+                pars_sets.insert(0, left_sets[i-1].intersection(right_sets[j-1]))
+
             i = i-1
             j = j-1 
             
@@ -103,6 +116,8 @@ def TraceBack(T, tree):
                 new_col[n] = '-'
             for m in range(len(right_alignment)):
                 new_col[len(left_alignment)+m] = right_alignment[m][j-1]
+           
+            pars_sets.insert(0, right_sets[j-1])
             
             j = j-1    
             
@@ -113,29 +128,40 @@ def TraceBack(T, tree):
                 
             for m in range(len(right_alignment)):
                 new_col[len(left_alignment)+m] = '-' 
-  
+      
+            pars_sets.insert(0, left_sets[i-1])
+ 
             i = i-1   
 
         align = np.concatenate((new_col, align), axis=1)
         
     tree.add_features(alignment = align)
+    tree.add_features(parsimony_sets = pars_sets)  
+    
+#%%
+
+def AlignWithDollo(tree):
+    parsimony_score = 0
+    
+    for leaf in tree.iter_leaves():
+        InitalizeSetsAndAlignment(leaf)
         
+    for node in tree.traverse('postorder'):
+        if not node.is_leaf():
+            pars_score, T = GenerateMatrices(node)
+            TraceBack(T, node)
+            parsimony_score = parsimony_score + pars_score
+        
+    return parsimony_score
     
-    
-    
-    
+        
+            
 #%%    
-for leaf in tree.iter_leaves():
-    ParsimonySetsLeaves(leaf)
-    print(leaf.parsimony_sets)
-    t = leaf.alignment
-print(tree.children[0])
-print(tree.children[1])
-S, T  = GenerateMatrices(tree)
-TraceBack(T, tree)
+print(AlignWithDollo(tree))
+
 print(tree.alignment)
-print(S)
-print(T)
+print(tree.parsimony_sets)
+
     
 
                 
