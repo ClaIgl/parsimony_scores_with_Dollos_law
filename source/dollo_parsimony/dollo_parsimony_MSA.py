@@ -5,18 +5,25 @@ Created on Wed Mar 31 16:19:26 2021
 
 @author: claraiglhaut
 """
-from ete3 import PhyloTree
 import numpy as np
 import random
 
-sequences = '/Users/claraiglhaut/Desktop/ZHAW/TrackModule2/test_data_MSA/test_MSA_sequence'
-newick = '/Users/claraiglhaut/Desktop/ZHAW/TrackModule2/test_data_MSA/test_MSA_tree'
-
-tree = PhyloTree(newick=newick, alignment=sequences)
-print(tree)
-  
 
 def InitalizeSetsAndAlignment(leaf):
+    '''
+    Initializes the nucleotide sets and the alignments at the leaf nodes
+
+    Parameters
+    ----------
+    leaf : PhlyoNode or PhyloTree
+        Tree leaves with ungapped sequences
+
+    Returns
+    -------
+    None.
+
+    '''
+  
     pars_sets = [set(character) for character in leaf.sequence]
     align = np.empty((1, len(leaf.sequence)), dtype=str)
     for i in range(len(leaf.sequence)):
@@ -25,29 +32,57 @@ def InitalizeSetsAndAlignment(leaf):
     leaf.add_features(parsimony_sets = pars_sets)
     leaf.add_features(alignment = align)
 
-
-#%%    
+   
 def GenerateMatrices(tree):
+    '''
+    Forward phase of the progressive algorithm. Generates the matrix S with
+    the parsimony score and the trace back matrix T, which records the moves. 
+    Returns the parsimony score and the trace back matrix. Adds the nucleotide sets
+    and the optimal alignment to the tree.
+
+    Parameters
+    ----------
+    tree : PhlyoTree or PhyloNode
+        Current (sub-)tree
+
+    Returns
+    -------
+    parsimony_score : numpy.float64
+        parsimony score of the alignment for the given tree
+    T : numpy.ndarray
+        Trace back matrix 
+
+    '''
+   
+    
     left_sets = tree.children[0].parsimony_sets
     right_sets = tree.children[1].parsimony_sets
     
     S = np.zeros((len(left_sets)+1, len(right_sets)+1))
     T = np.zeros((len(left_sets)+1, len(right_sets)+1))
     
+    #fill the first column of the trace back matrix 
+    #only gaps for the right alignment - move vertical
     for i in range(len(left_sets)+1):
         S[i][0] = i
         if i == 0:
             T[i][0] = 0
         else:
             T[i][0] = 3
-            
+    
+    #fill the first row of the trace back matrix
+    #only gaps for the left alignment - move horizontal
     for j in range(len(right_sets)+1):
         S[0][j] = j
         if j == 0:
             T[0][j] = 0
         else:
             T[0][j] = 2
-        
+    
+    #fill the score matrix S
+    #matching sets with a non empty intersection +0
+    #matching sets with an empty intersection +1
+    #gap penalty +1
     for i in range(1, len(left_sets)+1):
         for j in range(1, len(right_sets)+1):
             if left_sets[i-1].intersection(right_sets[j-1]):
@@ -67,6 +102,7 @@ def GenerateMatrices(tree):
             if S[i][j] == score_gap_right:
                 moves.append(3) #move vertical
             
+            #if the path is not unique chose one at random
             T[i][j] = random.choice(moves)
             
     parsimony_score = S[len(left_sets)][len(right_sets)]
@@ -74,12 +110,29 @@ def GenerateMatrices(tree):
     return parsimony_score, T
 
 
-#%%
 def TraceBack(T, tree):
+    '''
+    Finds the alignment for the (sub-)tree and adds it to the (sub-)tree root. 
+    Adds the nucleotide sets to the (sub-)tree root.
 
+    Parameters
+    ----------
+    T : numpy.ndarray
+        Trace back matrix for the alognment
+    tree : PhyloTree or PhyloNode
+        Current (sub-)tree
+
+    Returns
+    -------
+    None.
+
+    '''
+    
+    #get the alignemts from the left and right child
     left_alignment = tree.children[0].alignment
     right_alignment = tree.children[1].alignment
     
+    #get the nucleotide sets from the left and right child
     left_sets = tree.children[0].parsimony_sets
     right_sets = tree.children[1].parsimony_sets
 
@@ -95,6 +148,7 @@ def TraceBack(T, tree):
     
     while i > 0 or j > 0:
         
+        #move diagonal - match two colums with residues 
         if T[i][j] == 1:
             new_col = np.empty((number_of_rows,1), dtype=str)
             for n in range(len(left_alignment)):
@@ -109,7 +163,9 @@ def TraceBack(T, tree):
 
             i = i-1
             j = j-1 
-            
+        
+        #move vertical - put a gap column in the left alignment and match 
+        #with the column of the right alignment
         elif T[i][j] == 2:
             new_col = np.empty((number_of_rows,1), dtype=str)
             for n in range(len(left_alignment)):
@@ -120,7 +176,9 @@ def TraceBack(T, tree):
             pars_sets.insert(0, right_sets[j-1])
             
             j = j-1    
-            
+        
+        #move horizontal - put a gap column in the right alignment and match 
+        #with the column of the left alignment
         elif T[i][j] == 3:
             new_col = np.empty((number_of_rows,1), dtype=str)
             for n in range(len(left_alignment)):
@@ -137,10 +195,25 @@ def TraceBack(T, tree):
         
     tree.add_features(alignment = align)
     tree.add_features(parsimony_sets = pars_sets)  
+ 
     
-#%%
-
 def AlignWithDollo(tree):
+    '''
+    Finds the Multiple Sequence Alignment for the given tree.
+    
+    Parameters
+    ----------
+    tree : PhyloNode or PhyloTree
+        Phylogenetic Tree with ungapped sequences at the leaves
+
+    Returns
+    -------
+    parsimony_score : numpy.float64
+        parsimony score for the alignment on the tree
+    alignment : numpy.ndarray
+        Multiple sequence alignment for the given tree 
+
+    '''
     parsimony_score = 0
     
     for leaf in tree.iter_leaves():
@@ -151,19 +224,10 @@ def AlignWithDollo(tree):
             pars_score, T = GenerateMatrices(node)
             TraceBack(T, node)
             parsimony_score = parsimony_score + pars_score
-        
-    return parsimony_score
+    alignment = tree.alignment 
     
-        
-            
-#%%    
-print(AlignWithDollo(tree))
-
-print(tree.alignment)
-print(tree.parsimony_sets)
-
+    return parsimony_score, alignment
     
-
                 
                 
                 
