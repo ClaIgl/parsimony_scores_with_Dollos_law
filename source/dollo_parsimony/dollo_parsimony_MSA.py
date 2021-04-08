@@ -211,13 +211,12 @@ def AlignWithDollo(tree):
         Multiple sequence alignment for the given tree 
 
     '''
-    parsimony_score = 0
     
-    for leaf in tree.iter_leaves():
-        InitalizeSetsAndAlignment(leaf)
-        
+    parsimony_score = 0   
     for node in tree.traverse('postorder'):
-        if not node.is_leaf():
+        if node.is_leaf():
+            InitalizeSetsAndAlignment(node)    
+        else:
             pars_score, T = GenerateMatrices(node)
             TraceBack(T, node)
             parsimony_score = parsimony_score + pars_score
