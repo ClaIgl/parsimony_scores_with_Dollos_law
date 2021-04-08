@@ -97,9 +97,9 @@ def GenerateMatrices(tree):
             # if path is not unique favor the diagonal move
             if S[i][j] == score_intersection:
                 T[i][j] = 1 #move diagonal
-            if S[i][j] == score_gap_left:
+            elif S[i][j] == score_gap_left:
                 T[i][j] = 2 #move horizontal
-            if S[i][j] == score_gap_right:
+            elif S[i][j] == score_gap_right:
                 T[i][j] = 3 #move vertical
             
     parsimony_score = S[len(left_sets)][len(right_sets)]
