@@ -94,16 +94,13 @@ def GenerateMatrices(tree):
             
             S[i][j] = min(score_intersection, score_gap_left, score_gap_right)
             
-            moves = list()
+            # if path is not unique favor the diagonal move
             if S[i][j] == score_intersection:
-                moves.append(1) #move diagonal
+                T[i][j] = 1 #move diagonal
             if S[i][j] == score_gap_left:
-                moves.append(2) #move horizontal
+                T[i][j] = 2 #move horizontal
             if S[i][j] == score_gap_right:
-                moves.append(3) #move vertical
-            
-            #if the path is not unique chose one at random
-            T[i][j] = random.choice(moves)
+                T[i][j] = 3 #move vertical
             
     parsimony_score = S[len(left_sets)][len(right_sets)]
     
