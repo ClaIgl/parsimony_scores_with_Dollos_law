@@ -6,7 +6,6 @@ Created on Wed Mar 31 16:19:26 2021
 @author: claraiglhaut
 """
 import numpy as np
-import random
 
 
 def InitalizeSetsAndAlignment(leaf):
@@ -24,14 +23,15 @@ def InitalizeSetsAndAlignment(leaf):
 
     '''
   
-    pars_sets = [set(character) for character in leaf.sequence]
+    pars_sets = []
     align = np.empty((1, len(leaf.sequence)), dtype=str)
     for i in range(len(leaf.sequence)):
-        align[0][i] = leaf.sequence[i]
+        if leaf.sequence[i] != '-':
+            align[0][i] = leaf.sequence[i]
+            pars_sets.append(set(leaf.sequence[i]))
                      
     leaf.add_features(parsimony_sets = pars_sets)
     leaf.add_features(alignment = align)
-
    
 def GenerateMatrices(tree):
     '''
