@@ -79,14 +79,10 @@ def DolloParsimony(tree):
 
 def construct_pars_tree_Dollo(tree):
     DolloParsimony(tree)
-    sequence_constr = []
-    for node in tree.traverse('levelorder'):
+    for node in tree.traverse():
         if not node.is_leaf():
+            sequence_constr = []
             for i in range(len(node.parsimony_sets)):
-                if node.parsimony_sets[i] == set():
-                    sequence_constr.append('-')
-                else:    
-                    char = random.sample(node.parsimony_sets[i], 1)[0]
-                    sequence_constr.append(char)
-    
-        node.add_features(sequence = sequence_constr)
+                char = random.sample(node.parsimony_sets[i], 1)[0]
+                sequence_constr.append(char)
+            node.add_features(sequence = ''.join(sequence_constr))
