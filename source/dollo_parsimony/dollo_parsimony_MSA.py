@@ -22,16 +22,18 @@ def InitalizeSetsAndAlignment(leaf):
     None.
 
     '''
-  
+
     pars_sets = []
-    align = np.empty((1, len(leaf.sequence)), dtype=str)
+    align = np.empty((1, 0), dtype=str)
     for i in range(len(leaf.sequence)):
         if leaf.sequence[i] != '-':
-            align[0][i] = leaf.sequence[i]
+            character = np.array(leaf.sequence[i]).reshape((1,1))
+            align = np.concatenate((align, character), axis=1)
             pars_sets.append(set(leaf.sequence[i]))
                      
     leaf.add_features(parsimony_sets = pars_sets)
     leaf.add_features(alignment = align)
+    
    
 def GenerateMatrices(tree):
     '''
@@ -58,8 +60,8 @@ def GenerateMatrices(tree):
     left_sets = tree.children[0].parsimony_sets
     right_sets = tree.children[1].parsimony_sets
     
-    S = np.zeros((len(left_sets)+1, len(right_sets)+1))
-    T = np.zeros((len(left_sets)+1, len(right_sets)+1))
+    S = np.zeros((len(left_sets)+1, len(right_sets)+1), dtype=int)
+    T = np.zeros((len(left_sets)+1, len(right_sets)+1), dtype=int)
     
     #fill the first column of the trace back matrix 
     #only gaps for the right alignment - move vertical
