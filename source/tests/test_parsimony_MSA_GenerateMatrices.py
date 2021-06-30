@@ -7,7 +7,7 @@ Created on Sun Apr 11 17:31:16 2021
 """
 from ete3 import PhyloNode
 import pytest
-from dollo_parsimony.dollo_parsimony_MSA import GenerateMatrices
+from dollo_parsimony.ParsAlign import GenerateMatrices
 
 characters = characters = ['A', 'T', 'C', 'G']
 
