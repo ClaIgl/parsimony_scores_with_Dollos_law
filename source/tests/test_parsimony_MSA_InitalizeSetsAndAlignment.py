@@ -9,7 +9,7 @@ import pytest
 
 from ete3 import PhyloNode
 import numpy as np
-from dollo_parsimony.dollo_parsimony_MSA import InitalizeSetsAndAlignment
+from dollo_parsimony.ParsAlign import InitalizeSetsAndAlignment
 
 
 characters = ['A', 'T', 'C', 'G']
