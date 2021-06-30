@@ -13,10 +13,11 @@ from ete3 import PhyloTree
 from dollo_parsimony.ParsInsertionsScore import ParsInsertionsScore
 
 @pytest.mark.parametrize("newick,alignment,score,message",
-    [('test_data/test_tree','test_data/test_sequence.txt',3,"wrong score for test_tree and sequences.txt"),
-     ('test_data/test_tree','test_data/test_sequence1',7,"wrong score for test_tree and sequences1"),
-     ('test_data/test_tree1','test_data/test_sequence2',7,"wrong score for test_tree1 and sequences2"),
-     ('test_data/test_tree2','test_data/test_sequence3',3,"wrong score for test_tree2 and sequences3")])
+    [('test_data/test_tree','test_data/test_sequence.txt',2,"wrong score for test_tree and sequences.txt"),
+     ('test_data/test_tree','test_data/test_sequence1',5,"wrong score for test_tree and sequences1"),
+     ('test_data/test_tree1','test_data/test_sequence2',3,"wrong score for test_tree1 and sequences2"),
+     ('test_data/test_tree2','test_data/test_sequence3',3,"wrong score for test_tree2 and sequences3"),
+     ('test_data/test_tree2','test_data/test_sequence4',0,"wrong score for test_tree2 and sequences3")])
 
 def test_example_trees_sequences(newick, alignment, score, message):
     tree = PhyloTree(newick=newick, alignment=alignment)
