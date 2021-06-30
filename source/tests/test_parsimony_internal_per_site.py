@@ -38,7 +38,7 @@ def test(ch0_score, ch0_set, ch1_score, ch1_set, exp_score, exp_set, message):
     tree.children[1].parsimony_scores = [ch1_score]
     tree.children[1].parsimony_sets = [ch1_set]
     
-    parsimony_internal_per_site(tree, 0)
+    ParsInsertionsInternal(tree, 0)
     
     assert tree.parsimony_scores[0] == exp_score, "wrong score for " + message
     assert tree.parsimony_sets[0] == exp_set, "wrong char set for " + message
