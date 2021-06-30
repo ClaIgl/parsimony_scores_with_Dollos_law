@@ -9,7 +9,7 @@ Created on Mon Apr 12 20:30:54 2021
 import numpy as np
 from ete3 import PhyloNode
 import pytest
-from dollo_parsimony.dollo_parsimony_MSA import TraceBack
+from dollo_parsimony.ParsAlign import TraceBack
 
 characters = characters = ['A', 'T', 'C', 'G']
 
