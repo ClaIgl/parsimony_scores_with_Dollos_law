@@ -10,8 +10,8 @@ import pytest
 
 from ete3 import PhyloNode
 
-from dollo_parsimony.dollo_parsimony_score import parsimony_internal_per_site
-from dollo_parsimony.dollo_parsimony_score import characters
+from dollo_parsimony.ParsInsertionsScore import ParsInsertionsInternal
+from dollo_parsimony.ParsInsertionsScore import characters
 
 @pytest.mark.parametrize("ch0_score,ch0_set,ch1_score,ch1_set,exp_score,exp_set,message",
     [(0,set('-'),0,set('-'),0,set('-'),"two gap sets with 0 score"),
