@@ -2,8 +2,8 @@ import pytest
 
 from ete3 import PhyloNode
 
-from dollo_parsimony.dollo_parsimony_score import parsimony_leaves
-from dollo_parsimony.dollo_parsimony_score import characters
+from dollo_parsimony.ParsInsertionsScore import ParsInsertionsLeaf
+from dollo_parsimony.ParsInsertionsScore import characters
 
 @pytest.mark.parametrize("sequence,expected_set,message",
     [(characters[0],set(characters[0]),"one char"),
@@ -13,7 +13,7 @@ from dollo_parsimony.dollo_parsimony_score import characters
 def test_one_char(sequence, expected_set, message):
     node = PhyloNode()
     node.sequence = sequence
-    parsimony_leaves(node)
+    ParsInsertionsLeaf(node)
     assert len(node.parsimony_scores) == len(node.sequence), "wrong number of scores for " + message
     assert len(node.parsimony_sets) == len(node.sequence), "wrong number of sets for " + message
     assert node.parsimony_scores[0] == 0, "wrong score for " + message
@@ -26,6 +26,6 @@ def test_one_char(sequence, expected_set, message):
 def test_multiple_chars(sequence, message):
     node = PhyloNode()
     node.sequence = sequence
-    parsimony_leaves(node)
+    ParsInsertionsLeaf(node)
     assert len(node.parsimony_scores) == len(node.sequence), "wrong number of scores for " + message
     assert len(node.parsimony_sets) == len(node.sequence), "wrong number of sets for " + message
