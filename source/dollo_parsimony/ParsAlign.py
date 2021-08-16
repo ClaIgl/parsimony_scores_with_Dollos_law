@@ -227,19 +227,7 @@ def ParsAlign(tree):
     return parsimony_score, alignment
     
                 
-#%%%                
-                
-#%%
-from ete3 import PhyloNode
 
-treefile = '/Users/claraiglhaut/Desktop/ParsScores_work/test_data/test_MSA_tree'
-sequences = '/Users/claraiglhaut/Desktop/ParsScores_work/test_data/test_MSA_sequence3'
-
-tree = PhyloNode(newick=treefile, alignment=sequences, format=1)
-
-score, alignment = ParsAlign(tree) 
-     
-            
         
     
     
